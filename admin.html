@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Carapapoils</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #f5f0e8; min-height: 100vh; }
+
+/* LOGIN */
+#ecran-login {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem;
+  background: linear-gradient(135deg, #2d4a1e, #4a7c3f);
+}
+.login-box {
+  background: #fff; border-radius: 16px; padding: 2rem; width: 100%; max-width: 340px; text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+}
+.login-box img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid #4a7c3f; margin-bottom: 1rem; }
+.login-box h1 { font-size: 1.2rem; color: #2d2010; margin-bottom: 1.5rem; }
+.login-box input {
+  width: 100%; border: 1.5px solid #ccc; border-radius: 10px;
+  padding: 0.7rem 1rem; font-size: 1rem; margin-bottom: 0.6rem; display: block;
+}
+.login-box input:focus { outline: none; border-color: #4a7c3f; }
+.erreur { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 8px; padding: 0.5rem; font-size: 0.85rem; margin-bottom: 0.6rem; display: none; }
+.btn-vert { width: 100%; background: #4a7c3f; color: #fff; border: none; border-radius: 10px; padding: 0.75rem; font-size: 1rem; font-weight: 700; cursor: pointer; }
+.btn-vert:hover { background: #3a6231; }
+
+/* DASHBOARD */
+#ecran-admin { display: none; }
+.topbar {
+  background: #4a7c3f; color: #fff; padding: 0.9rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.topbar strong { font-size: 1rem; }
+.topbar a { color: #fff; text-decoration: none; font-size: 0.85rem; background: rgba(255,255,255,0.2); padding: 0.3rem 0.8rem; border-radius: 8px; margin-left: 0.5rem; }
+.topbar a:hover { background: rgba(255,255,255,0.35); }
+
+.contenu { max-width: 640px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+
+.carte { background: #fff; border-radius: 14px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+.carte h2 { font-size: 1rem; color: #2d2010; margin-bottom: 1.2rem; padding-bottom: 0.6rem; border-bottom: 1.5px solid #eee; }
+
+.ligne2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 0.7rem; }
+.champ label { display: block; font-size: 0.8rem; font-weight: 700; color: #2d2010; margin-bottom: 0.3rem; }
+.champ input, .champ select, .champ textarea {
+  width: 100%; border: 1.5px solid #ddd; border-radius: 8px;
+  padding: 0.55rem 0.7rem; font-size: 0.9rem; font-family: Arial, sans-serif;
+}
+.champ input:focus, .champ select:focus, .champ textarea:focus { outline: none; border-color: #4a7c3f; }
+.champ textarea { resize: vertical; min-height: 80px; }
+
+.cases { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-bottom: 0.7rem; }
+.cases label { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; cursor: pointer; }
+.cases input { accent-color: #4a7c3f; }
+
+.zone-photo {
+  border: 2px dashed #ccc; border-radius: 10px; padding: 1.2rem;
+  text-align: center; cursor: pointer; position: relative; transition: border-color 0.2s;
+  margin-bottom: 0.7rem;
+}
+.zone-photo:hover { border-color: #4a7c3f; }
+.zone-photo input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+#apercu-photo { display: none; width: 100%; max-height: 180px; object-fit: cover; border-radius: 8px; margin-top: 0.6rem; }
+
+.msg-erreur-form { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 8px; padding: 0.5rem; font-size: 0.85rem; margin-bottom: 0.7rem; display: none; }
+.msg-ok { background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; border-radius: 8px; padding: 0.5rem; font-size: 0.85rem; margin-bottom: 0.7rem; display: none; }
+
+/* Liste */
+.animal-ligne {
+  display: flex; align-items: center; gap: 0.8rem; padding: 0.7rem;
+  border: 1px solid #eee; border-radius: 10px; margin-bottom: 0.5rem; background: #fafaf8;
+}
+.animal-ligne img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+.animal-ligne-info { flex: 1; min-width: 0; }
+.animal-ligne-info strong { display: block; font-size: 0.9rem; color: #2d2010; }
+.animal-ligne-info span { font-size: 0.78rem; color: #999; }
+.btn-suppr { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 8px; padding: 0.35rem 0.7rem; font-size: 0.8rem; cursor: pointer; flex-shrink: 0; }
+.btn-suppr:hover { background: #fee2e2; }
+
+.badge { background: #4a7c3f; color: #fff; border-radius: 999px; padding: 0.1rem 0.5rem; font-size: 0.75rem; font-weight: 700; margin-left: 0.4rem; }
+
+@media (max-width: 500px) { .ligne2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- ÉCRAN LOGIN -->
+<div id="ecran-login">
+  <div class="login-box">
+    <img src="images/logo.jpg" alt="Logo Carapapoils">
+    <h1>Administration<br>Carapapoils</h1>
+    <input type="password" id="mdp" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')connexion()">
+    <div class="erreur" id="err-login">Mot de passe incorrect.</div>
+    <button class="btn-vert" onclick="connexion()">Se connecter</button>
+  </div>
+</div>
+
+<!-- ÉCRAN ADMIN -->
+<div id="ecran-admin">
+  <div class="topbar">
+    <strong>🐾 Administration Carapapoils</strong>
+    <div>
+      <a href="index.html" target="_blank">Voir le site</a>
+      <a href="#" onclick="deconnexion();return false;">Déconnexion</a>
+    </div>
+  </div>
+
+  <div class="contenu">
+
+    <!-- Formulaire ajout -->
+    <div class="carte">
+      <h2>➕ Ajouter un animal à l'adoption</h2>
+
+      <div class="ligne2">
+        <div class="champ">
+          <label>Prénom *</label>
+          <input type="text" id="f-nom" placeholder="Ex: Minou">
+        </div>
+        <div class="champ">
+          <label>Espèce *</label>
+          <select id="f-espece">
+            <option value="">— Choisir —</option>
+            <option value="chat">Chat</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ligne2">
+        <div class="champ">
+          <label>Âge</label>
+          <input type="text" id="f-age" placeholder="Ex: 2 ans, 3 mois">
+        </div>
+        <div class="champ">
+          <label>Sexe</label>
+          <select id="f-sexe">
+            <option value="">—</option>
+            <option value="Mâle">Mâle</option>
+            <option value="Femelle">Femelle</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="cases">
+        <label><input type="checkbox" id="f-sterilise"> Stérilisé(e)</label>
+        <label><input type="checkbox" id="f-vaccine"> Vacciné(e)</label>
+        <label><input type="checkbox" id="f-puce"> Pucé(e)</label>
+        <label><input type="checkbox" id="f-vermifuge"> Vermifugé(e)</label>
+      </div>
+
+      <div class="champ" style="margin-bottom:0.7rem">
+        <label>Tags supplémentaires <span style="font-weight:400;color:#999">(séparés par virgules)</span></label>
+        <input type="text" id="f-tags" placeholder="Ex: Câlin, Sociable, Intérieur">
+      </div>
+
+      <div class="champ" style="margin-bottom:0.7rem">
+        <label>Description *</label>
+        <textarea id="f-desc" placeholder="Son caractère, ses besoins, son histoire..."></textarea>
+      </div>
+
+      <div class="champ">
+        <label>Photo *</label>
+        <div class="zone-photo" id="zone-photo">
+          <input type="file" id="f-photo" accept="image/*">
+          <div id="photo-label">📷 Cliquez ou glissez une photo ici</div>
+          <img id="apercu-photo" alt="Aperçu">
+        </div>
+      </div>
+
+      <div class="msg-erreur-form" id="f-erreur"></div>
+      <div class="msg-ok" id="f-ok">✅ Animal ajouté avec succès !</div>
+
+      <button class="btn-vert" id="btn-ajouter" onclick="ajouter()">Ajouter l'animal</button>
+    </div>
+
+    <!-- Liste -->
+    <div class="carte">
+      <h2>📋 Animaux publiés <span class="badge" id="compteur">0</span></h2>
+      <div id="liste-animaux">
+        <p style="color:#999;text-align:center;padding:1rem">Aucun animal pour l'instant.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var MDP = 'mw3bo2cod';
+var CLE = 'carapapoils_animaux';
+
+function getList() { try { return JSON.parse(localStorage.getItem(CLE)) || []; } catch(e) { return []; } }
+function saveList(l) { localStorage.setItem(CLE, JSON.stringify(l)); }
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+
+// Vérifier si déjà connecté
+window.onload = function() {
+  if (sessionStorage.getItem('cara_ok') === '1') afficherAdmin();
+};
+
+function connexion() {
+  var v = document.getElementById('mdp').value;
+  if (v === MDP) {
+    sessionStorage.setItem('cara_ok', '1');
+    document.getElementById('err-login').style.display = 'none';
+    afficherAdmin();
+  } else {
+    document.getElementById('err-login').style.display = 'block';
+    document.getElementById('mdp').value = '';
+    document.getElementById('mdp').focus();
+  }
+}
+
+function afficherAdmin() {
+  document.getElementById('ecran-login').style.display = 'none';
+  document.getElementById('ecran-admin').style.display = 'block';
+  renderListe();
+}
+
+function deconnexion() {
+  sessionStorage.removeItem('cara_ok');
+  document.getElementById('ecran-admin').style.display = 'none';
+  document.getElementById('ecran-login').style.display = 'flex';
+  document.getElementById('mdp').value = '';
+}
+
+// Aperçu photo
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('f-photo').addEventListener('change', function() {
+    var file = this.files[0];
+    if (!file) return;
+    var r = new FileReader();
+    r.onload = function(e) {
+      document.getElementById('apercu-photo').src = e.target.result;
+      document.getElementById('apercu-photo').style.display = 'block';
+      document.getElementById('photo-label').style.display = 'none';
+      document.getElementById('zone-photo').style.borderColor = '#4a7c3f';
+    };
+    r.readAsDataURL(file);
+  });
+});
+
+function ajouter() {
+  var nom    = document.getElementById('f-nom').value.trim();
+  var espece = document.getElementById('f-espece').value;
+  var desc   = document.getElementById('f-desc').value.trim();
+  var photo  = document.getElementById('f-photo').files[0];
+  var errDiv = document.getElementById('f-erreur');
+  var okDiv  = document.getElementById('f-ok');
+  errDiv.style.display = 'none';
+  okDiv.style.display = 'none';
+
+  if (!nom)    { errDiv.textContent = 'Le prénom est obligatoire.'; errDiv.style.display='block'; return; }
+  if (!espece) { errDiv.textContent = "L'espèce est obligatoire."; errDiv.style.display='block'; return; }
+  if (!desc)   { errDiv.textContent = 'La description est obligatoire.'; errDiv.style.display='block'; return; }
+  if (!photo)  { errDiv.textContent = 'La photo est obligatoire.'; errDiv.style.display='block'; return; }
+
+  var r = new FileReader();
+  r.onload = function(ev) {
+    var img = new Image();
+    img.onload = function() {
+      var maxW = 800, scale = img.width > maxW ? maxW/img.width : 1;
+      var cv = document.createElement('canvas');
+      cv.width = Math.round(img.width*scale);
+      cv.height = Math.round(img.height*scale);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+
+      var tags = [];
+      var age = document.getElementById('f-age').value.trim();
+      var sexe = document.getElementById('f-sexe').value;
+      if (age) tags.push(age);
+      if (sexe) tags.push(sexe);
+      if (document.getElementById('f-sterilise').checked) tags.push('Stérilisé(e)');
+      if (document.getElementById('f-vaccine').checked)   tags.push('Vacciné(e)');
+      if (document.getElementById('f-puce').checked)      tags.push('Pucé(e)');
+      if (document.getElementById('f-vermifuge').checked) tags.push('Vermifugé(e)');
+      document.getElementById('f-tags').value.split(',').forEach(function(t){ if(t.trim()) tags.push(t.trim()); });
+
+      var animal = {
+        id: genId(), name: nom, espece: espece,
+        tags: tags, desc: desc,
+        photo: cv.toDataURL('image/jpeg', 0.82),
+        date: new Date().toLocaleDateString('fr-FR')
+      };
+
+      var list = getList();
+      list.unshift(animal);
+      saveList(list);
+
+      // Reset formulaire
+      document.getElementById('f-nom').value = '';
+      document.getElementById('f-espece').value = '';
+      document.getElementById('f-age').value = '';
+      document.getElementById('f-sexe').value = '';
+      document.getElementById('f-desc').value = '';
+      document.getElementById('f-tags').value = '';
+      document.getElementById('f-sterilise').checked = false;
+      document.getElementById('f-vaccine').checked = false;
+      document.getElementById('f-puce').checked = false;
+      document.getElementById('f-vermifuge').checked = false;
+      document.getElementById('f-photo').value = '';
+      document.getElementById('apercu-photo').style.display = 'none';
+      document.getElementById('photo-label').style.display = 'block';
+      document.getElementById('zone-photo').style.borderColor = '#ccc';
+
+      okDiv.style.display = 'block';
+      renderListe();
+      setTimeout(function(){ okDiv.style.display='none'; }, 3000);
+    };
+    img.src = ev.target.result;
+  };
+  r.readAsDataURL(photo);
+}
+
+function renderListe() {
+  var list = getList();
+  document.getElementById('compteur').textContent = list.length;
+  var c = document.getElementById('liste-animaux');
+  if (!list.length) {
+    c.innerHTML = '<p style="color:#999;text-align:center;padding:1rem">Aucun animal pour l\'instant.</p>';
+    return;
+  }
+  c.innerHTML = list.map(function(a) {
+    return '<div class="animal-ligne">' +
+      '<img src="'+a.photo+'" alt="'+a.name+'">' +
+      '<div class="animal-ligne-info">' +
+        '<strong>'+a.name+'</strong>' +
+        '<span>'+a.espece+' — '+a.tags.join(', ')+'</span>' +
+      '</div>' +
+      '<button class="btn-suppr" onclick="supprimer(\''+a.id+'\')">🗑️ Supprimer</button>' +
+    '</div>';
+  }).join('');
+}
+
+function supprimer(id) {
+  if (!confirm('Supprimer cet animal ?')) return;
+  saveList(getList().filter(function(a){ return a.id !== id; }));
+  renderListe();
+}
+</script>
+</body>
+</html>
